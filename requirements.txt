@@ -1,0 +1,4 @@
+uvicorn
+langchain>=0.2
+langchain_openai
+streamlit
