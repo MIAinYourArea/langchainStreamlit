@@ -39,7 +39,8 @@ def keyword_prompt(user_input):
     return prompt
 
 input = '얼굴 넘 건조해'
-llm_answer1 = request_llm_qa(category_prompt(input))
+c_prompt = category_prompt(input)
+llm_answer1 = request_llm_qa(c_prompt)
 category = llm_answer1["choices"][0]['text']
 
 llm_answer2 = request_llm_qa(keyword_prompt(category, input))

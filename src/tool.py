@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
+
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 load_dotenv()
@@ -25,7 +25,7 @@ def add(a: int, b: int) -> int:
 
 tools = [multiply, add]
 
-#모델이 tool를 바인드
+#모델에 tool를 바인드
 llm_with_tools = model.bind_tools(tools)
 
 
