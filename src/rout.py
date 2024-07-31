@@ -37,7 +37,6 @@ service_prompt = PromptTemplate.from_template(
 
 router_chain = service_prompt | model |output_parser
 
-
 #서브체인 1) 화장품 카테고리 분류 runnable
 category_prompt = PromptTemplate.from_template(
  'JSON 포맷으로 화장품을 사려는 고객의 요청을 듣고 알맞는 화장품 카테고리를 분류하세요. '
@@ -47,28 +46,21 @@ category_prompt = PromptTemplate.from_template(
  '</고객 요청>' 
  'category:'
 )
-
 category_chain = category_prompt | model |{"category": output_parser}
-
-
 
 #서브체인 2) 배송조회 함수, 함수를 runnable 객체로 만든다. 
 def delivery_tracking(input=None):
     return "배송중"
-
 delivery = RunnableLambda(delivery_tracking)
 
-
-#서브 체인 3) : 디폴트 체인 자유대화 
+#서브 체인 3) : 디폴트 체인 자유질문 
 prompt = PromptTemplate.from_template(
  '사용자 질문에 대해 답변하세요. '
   '<고객 요청>'
  '{user_input}'
  '</고객 요청>' 
 )
-
 conversation = prompt | model | output_parser
-
 
 
 #사용자 정의 함수(라우팅 기준 검사)
@@ -82,5 +74,5 @@ def route(info):
 
 
 full_chain = {"topic": router_chain, "user_input": lambda x: x["user_input"]} | RunnableLambda(route)
-result = full_chain.invoke({"user_input": "퍼스널컬러가뭐야 "})
+result = full_chain.invoke({"user_input": "양자역학이뭐야 "})
 print(result)

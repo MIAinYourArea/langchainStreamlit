@@ -7,11 +7,13 @@ import json
 import requests
 load_dotenv()
 import traceback
+from langchain_core.runnables import chain
+from copy import deepcopy
 
 
 @tool
 def search(query: str) -> str:
-    """사용자 요청에 맞는 화장품을 한국어 키워드로 검색""" 
+    """화장품을 사려는 고객에게 추천할 화장품의 특징, 기능, 성분들로 자연어 검색""" 
     engine_url = "http://10.10.50.2:5411/search?"
     vol =  "vol.tab"
     params = {
@@ -56,18 +58,29 @@ tools = [search, multiply, add]
 model = ChatOpenAI()
 llm_with_tools = model.bind_tools(tools)
 
-query = "얼굴이 너무 건조해 보습크림 찾아줘"
+# query = "얼굴이 너무 건조해 보습크림 찾아줘"
+# messages = [HumanMessage(query)]
+# ai_msg = llm_with_tools.invoke(messages)
+# messages.append(ai_msg)
+
+@chain
+def tool_invoke(ai_msg):
+    messages.append(ai_msg)
+    for tool_call in ai_msg.tool_calls:
+        selected_tool = {"add": add, "multiply": multiply, 'search':search }[tool_call["name"].lower()]
+        #print(selected_tool)
+        tool_msg = selected_tool.invoke(tool_call)
+        #print(tool_msg)
+        messages.append(tool_msg)
+    return messages
+
+# result = llm_with_tools.invoke(messages)
+# print(result)
+
+
+#체인으로 구현하면
+query = "3더하기 3은 뭐야"
 messages = [HumanMessage(query)]
-ai_msg = llm_with_tools.invoke(messages)
-messages.append(ai_msg)
 
-
-for tool_call in ai_msg.tool_calls:
-    selected_tool = {"add": add, "multiply": multiply, 'search':search }[tool_call["name"].lower()]
-    print(selected_tool)
-    tool_msg = selected_tool.invoke(tool_call)
-    print(tool_msg)
-    messages.append(tool_msg)
-
-result = llm_with_tools.invoke(messages)
-print(result)
+chain = llm_with_tools | tool_invoke | llm_with_tools
+print(chain.invoke(messages))
